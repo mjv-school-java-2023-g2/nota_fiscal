@@ -6,6 +6,7 @@ import org.example.models.Endereco;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ImpressorCupom {
     public void imprimir(Cupom cupom){
@@ -20,9 +21,7 @@ public class ImpressorCupom {
         CONSIDERE O COMPRIMENTO MÁXIMO DE 50 CARACTERES EM CADA LINHA
         E APLIQUE O RESPECTIVO ALINHAMENTO
          */
-        List<CupomItem> cupons = cupom.itens;
-        CupomItem item1 = cupons.get(0);
-        CupomItem item2 = cupons.get(1);
+        List<CupomItem> itens = cupom.itens;
 
         Endereco end = cupom.endereco;
         String conteudo = String.format("""
@@ -36,11 +35,7 @@ public class ImpressorCupom {
                         %s
                         CUPOM FISCAL
                         ITEM COD. %-30s%10s
-                        %-5s%-5s%-30s%10.2f
-                        %-5s%-5s%-30s%10.2f
-                        %s
                         """
-
                 ,tracos()
                 ,cupom.nomeFantasia
                 ,end.logradouro, end.numero, end.complemento, end.bairro, end.cidade, end.uf
@@ -50,16 +45,13 @@ public class ImpressorCupom {
                 ,cupom.cdd.toString()
                 ,tracos()
                 ,"DESCRIÇÃO","VALOR"
-                ,item1.ordem,item1.sku,item1.descricao, item1.preco*item1.quantidade
-                ,item2.ordem,item2.sku,item2.descricao, item2.preco*item2.quantidade
-                ,tracos()
         );
 
-        System.out.println(conteudo);
+        System.out.println(conteudo.concat(getItens(itens)));
     }
     private String tracos(){
         String repeated = new String(new char[50]).replace("\0", "-");
-        return repeated + "\n";
+        return repeated;
     }
     private String cpfCnpj(String cpfCnpj){
         String newCnpj = "";
@@ -68,5 +60,19 @@ public class ImpressorCupom {
         else
             newCnpj = cpfCnpj.replaceAll("(\\d{2})(\\d{3})(\\d{3})(\\d{4})(\\d{2})", "$1.$2.$3/$4-$5");
         return newCnpj;
+    }
+
+    private String getItens(List<CupomItem> itens){
+        StringBuilder cf = new StringBuilder();
+        itens.stream().map(
+                item-> String.format("%-5s%-5s%-30s%10.2f \n",
+                                item.ordem,
+                                item.sku,
+                                item.descricao,
+                                item.preco*item.quantidade
+                )
+        ).forEach(cf::append);
+        cf.append(tracos());
+        return cf.toString();
     }
 }
