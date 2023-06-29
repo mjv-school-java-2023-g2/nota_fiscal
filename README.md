@@ -1,4 +1,4 @@
-# Atidade Nota Fiscal
+# Atividade Nota Fiscal
 Proposta: Refatorar a classe ImpressorCupom
 ````
 public class ImpressorCupom {
